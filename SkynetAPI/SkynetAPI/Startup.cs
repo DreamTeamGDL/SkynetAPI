@@ -9,6 +9,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+using SkynetAPI.Services;
+using SkynetAPI.Services.Interfaces;
+
 namespace SkynetAPI
 {
     public class Startup
@@ -23,6 +26,10 @@ namespace SkynetAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddTransient<IZonesRepository, ZonesRepository>();
+            services.AddTransient<IDevicesRepository, DevicesRepository>();
+            services.AddTransient<IClientsRepository, ClientsRepository>();
+
             services.AddMvc();
         }
 
@@ -34,7 +41,13 @@ namespace SkynetAPI
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseMvc();
+            app.UseMvc(routes =>{
+                routes.MapAreaRoute(
+                    "APIRoute",
+                    "api",
+                    "api/{controller=Home}/{action=Get}/{id?}"
+                );
+            });
         }
     }
 }
