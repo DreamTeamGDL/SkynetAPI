@@ -19,6 +19,7 @@ namespace SkynetAPI.Services
         {
             return new Client
             {
+                Name = "Cocina",
                 Alias = "Room1",
                 Devices = new List<Device>
                 {
