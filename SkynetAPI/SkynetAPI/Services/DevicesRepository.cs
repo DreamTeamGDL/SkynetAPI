@@ -14,9 +14,9 @@ namespace SkynetAPI.Services
             return Task.FromResult(new Device
             {
                 Id = Guid.NewGuid(),
-                Type = "Fan",
                 Data = new FanDevice
                 {
+                    Type = "Fan",
                     Speed = 0.5f,
                     Status = true,
                     Humidity = 0.6f

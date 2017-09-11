@@ -18,7 +18,7 @@ namespace SkynetAPI.Api.Controllers
         {
             _zonesRepository = zonesRepository;
         }
-
+        
         public async Task<IActionResult> Get() => Json(await _zonesRepository.GetZone());
     }
 }
