@@ -22,10 +22,21 @@ namespace SkynetAPI.Api.Controllers
         }
 
         [HttpGet]
-        public IActionResult Get() => Json(_zonesRepository.GetZone(TEST_GUID));
+        public IActionResult Get()
+        {
+            var arr = HttpContext.Request.Path.ToString().Split("/");
+            if(arr[arr.Length - 1] != "zones" && arr[arr.Length - 1] != "get")
+            {
+                return Json(_zonesRepository.GetZone(arr[arr.Length - 1], TEST_GUID));
+            }
 
-        [HttpGet("{name}")]
-        public IActionResult Get(string name) => Json(_zonesRepository.GetZone(name, TEST_GUID));
+            return Json(_zonesRepository.GetZone(TEST_GUID));
+        }
+    
+        /*
+        [HttpGet("{id}")]
+        public IActionResult Get(string id) => Json(_zonesRepository.GetZone(id, TEST_GUID));
+        */
 
         [HttpPost]
         public async Task<IActionResult> Post([FromBody]Zone newZone)
@@ -33,7 +44,7 @@ namespace SkynetAPI.Api.Controllers
             var zoneCreated = await _zonesRepository.CreateZone(newZone, TEST_GUID);
             if (zoneCreated)
             {
-                return RedirectToAction(nameof(this.Get), new { name = newZone.Name });
+                return RedirectToAction(nameof(this.Get), new { id = newZone.Name });
             }
 
             return BadRequest(ModelState);
