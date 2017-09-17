@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace SkynetAPI.Models
@@ -5,6 +6,7 @@ namespace SkynetAPI.Models
     public class Zone
     {
         public string Name { get; set; }
-        public IEnumerable<Client> Clients { get; set; } 
+        public Guid Id { get; set; }
+        public List<Client> Clients { get; set; } 
     }
 }

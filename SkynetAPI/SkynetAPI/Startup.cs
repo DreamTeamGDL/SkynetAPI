@@ -8,27 +8,34 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.EntityFrameworkCore;
 
 using SkynetAPI.Services;
 using SkynetAPI.Services.Interfaces;
+using SkynetAPI.DBContext;
 
 namespace SkynetAPI
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
             Configuration = configuration;
+            _env = env;
         }
 
+        private readonly IHostingEnvironment _env;
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<SkynetContext>(options => options.UseInMemoryDatabase("TestDB"));
+
             services.AddTransient<IZonesRepository, ZonesRepository>();
             services.AddTransient<IDevicesRepository, DevicesRepository>();
             services.AddTransient<IClientsRepository, ClientsRepository>();
+            services.AddTransient<IUserMapper, UserMapper>();
 
             services.AddMvc();
         }

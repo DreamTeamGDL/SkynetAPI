@@ -1,15 +1,16 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SkynetAPI.Models
 {
-    public class Client
+    public class ZoneRelation
     {
         [Key]
+        public Guid UserId { get; set; }
         public Guid ZoneId { get; set; }
         public string Name { get; set; }
-        public string Alias { get; set; }
-        public List<Device> Devices { get; set; }
     }
 }
