@@ -25,7 +25,7 @@ namespace SkynetAPI.Api.Controllers
         public IActionResult Get() => Json(_zonesRepository.GetZone(TEST_GUID));
 
         [HttpGet("{name}")]
-        public IActionResult Get(string name) => Json(_zonesRepository.GetZone(TEST_GUID));
+        public IActionResult Get(string name) => Json(_zonesRepository.GetZone(name, TEST_GUID));
 
         [HttpPost]
         public async Task<IActionResult> Post([FromBody]Zone newZone)
