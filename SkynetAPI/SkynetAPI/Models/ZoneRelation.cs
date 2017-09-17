@@ -9,8 +9,8 @@ namespace SkynetAPI.Models
     public class ZoneRelation
     {
         [Key]
-        public Guid UserId { get; set; }
         public Guid ZoneId { get; set; }
+        public Guid UserId { get; set; }
         public string Name { get; set; }
     }
 }
