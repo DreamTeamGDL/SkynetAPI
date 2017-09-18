@@ -8,10 +8,8 @@ namespace SkynetAPI.Services.Interfaces
 {
     public interface IZonesRepository
     {
-        IEnumerable<Zone> GetZone(Guid userId);
-
-        Zone GetZone(string name, Guid userId);
-
-        Task<bool> CreateZone(Zone zone, Guid userId);
+        Task<Zone> GetZone(string name, Guid userId);
+        Task<IEnumerable<Zone>> GetZones(Guid userId);
+        Task<(bool result, Guid id)> CreateZone(Zone zone, Guid userId);
     }
 }

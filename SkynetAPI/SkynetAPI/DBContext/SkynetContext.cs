@@ -16,9 +16,18 @@ namespace SkynetAPI.DBContext
 
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder) => base.OnModelCreating(modelBuilder);
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Zone>()
+                .HasMany(zone => zone.Clients);
+
+            modelBuilder.Entity<Client>()
+                .HasMany(client => client.Devices);
+        }
 
         public DbSet<ZoneRelation> ZonesRelation { get; set; }
         public DbSet<Zone> Zones { get; set; }
+        public DbSet<Client> Clients { get; set; }
+        public DbSet<Device> Devices { get; set; }
     }
 }

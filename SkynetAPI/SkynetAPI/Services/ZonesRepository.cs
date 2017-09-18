@@ -3,61 +3,97 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.WindowsAzure.Storage;
 
 using SkynetAPI.Models;
 using SkynetAPI.Services.Interfaces;
-using SkynetAPI.DBContext;
+using SkynetAPI.Entities;
+using SkynetAPI.Extensions.ZoneExtensions;
+using Microsoft.AspNetCore.Hosting;
 
 namespace SkynetAPI.Services
 {
     public class ZonesRepository : IZonesRepository
     {
-        private readonly SkynetContext _skynetContext;
-        private readonly IClientsRepository _devicesRepository;
-        private readonly IUserMapper _userMapper;
+        private readonly IClientsRepository _clientsRepository;
+        private readonly CloudTable _table;
 
-        public ZonesRepository(
-            IUserMapper userMapper,
-            IClientsRepository devicesRepository,
-            SkynetContext skynetContext)
+        public ZonesRepository(IClientsRepository clientsRepository, IHostingEnvironment env)
         {
-            _devicesRepository = devicesRepository;
-            _userMapper = userMapper;
-            _skynetContext = skynetContext;
-        }
+            _clientsRepository = clientsRepository;
 
-        public async Task<bool> CreateZone(Zone zone, Guid userId)
-        {
-            zone.Id = Guid.NewGuid();
-            var relation = new ZoneRelation
+            if (env.IsDevelopment())
             {
-                Name = zone.Name,
-                UserId = userId,
-                ZoneId = zone.Id
-            };
-
-            if (await _userMapper.CreateMap(relation))
+                var cloudClient = CloudStorageAccount.DevelopmentStorageAccount;
+                var tableClient = cloudClient.CreateCloudTableClient();
+                _table = tableClient.GetTableReference("zones");
+            }
+            else
             {
-                await _skynetContext.Zones.AddAsync(zone);
-                await _skynetContext.SaveChangesAsync();
-                return true;
+                var cloudClient = CloudStorageAccount.Parse("DefaultEndpointsProtocol=https;AccountName=skynetgdl;AccountKey=KVJGcGdkiUg6rhDyDbvbgb5YfCf3zaQX3z78K5YFrW4zmjaGzAnUlZwCna4k7nhuq9sZU6uqb7dHdi3S5EODvw==;EndpointSuffix=core.windows.net");
+                var tableClient = cloudClient.CreateCloudTableClient();
+                _table = tableClient.GetTableReference("zones");
             }
 
-            return false;
+            var tableTask = _table.CreateIfNotExistsAsync();
+            tableTask.Wait();
         }
 
-        public Zone GetZone(string name, Guid userId)
+        public async Task<(bool result, Guid id)> CreateZone(Zone zone, Guid userId)
         {
-            var zoneId = _userMapper.GetZoneId(userId, name);
-            return _skynetContext.Zones.Single(zo => zo.Id == zoneId);
+            var zoneId = Guid.NewGuid();
+            var zoneEntity = new ZoneEntity(zoneId, userId)
+            {
+                Name = zone.Name
+            };
+
+            var operation = TableOperation.Insert(zoneEntity);
+            var result = await _table.ExecuteAsync(operation);
+
+            return (result.HttpStatusCode == 204, zoneId);
         }
 
-        public IEnumerable<Zone> GetZone(Guid userId)
+        public async Task<Zone> GetZone(string name, Guid userId)
         {
-            var zonesId = _userMapper.GetZonesIds(userId);
-            var zones = _skynetContext.Zones
-                                      .Where(zone => zonesId.Contains(zone.Id))
-                                      .ToList();
+            var query = new TableQuery<ZoneEntity>()
+                .Where(TableQuery.CombineFilters(
+                        TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, userId.ToString()),
+                        TableOperators.And,
+                        TableQuery.GenerateFilterCondition("Name", QueryComparisons.Equal, name)));
+            
+            var queryResult = await _table.ExecuteQuerySegmentedAsync(query, null);
+
+            var zone = queryResult.Results.First().ToZone();
+            zone.Clients = (await _clientsRepository.GetClients(Guid.Parse(queryResult.First().RowKey))).ToList();
+
+            return zone;
+        }
+
+        public async Task<IEnumerable<Zone>> GetZones(Guid userId)
+        {
+            var query = new TableQuery<ZoneEntity>()
+                .Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, userId.ToString()));
+
+            var results = new List<ZoneEntity>();
+
+            TableContinuationToken token = null;
+            do
+            {
+                var queryResults = await _table.ExecuteQuerySegmentedAsync(query, token);
+                results.AddRange(queryResults.Results);
+                token = queryResults.ContinuationToken;
+            } while (token != null);
+
+            var zones = new List<Zone>();
+            for (int i = 0; i < results.Count; i++)
+            {
+                var zone = results[i].ToZone();
+                zone.Clients = (await _clientsRepository.GetClients(Guid.Parse(results[i].RowKey))).ToList();
+
+                zones.Add(zone);
+            }
+
             return zones;
         }
     }
