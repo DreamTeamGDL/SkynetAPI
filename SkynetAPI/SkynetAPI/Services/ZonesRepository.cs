@@ -5,12 +5,14 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.WindowsAzure.Storage.Table;
 using Microsoft.WindowsAzure.Storage;
+using Microsoft.Extensions.Options;
 
 using SkynetAPI.Models;
 using SkynetAPI.Services.Interfaces;
 using SkynetAPI.Entities;
 using SkynetAPI.Extensions.ZoneExtensions;
 using Microsoft.AspNetCore.Hosting;
+using SkynetAPI.Configs;
 
 namespace SkynetAPI.Services
 {
@@ -19,25 +21,18 @@ namespace SkynetAPI.Services
         private readonly IClientsRepository _clientsRepository;
         private readonly CloudTable _table;
 
-        public ZonesRepository(IClientsRepository clientsRepository, IHostingEnvironment env)
+        public ZonesRepository(
+            IOptions<TableConfig> config,
+            IClientsRepository clientsRepository)
         {
             _clientsRepository = clientsRepository;
 
-            if (env.IsDevelopment())
-            {
-                var cloudClient = CloudStorageAccount.DevelopmentStorageAccount;
-                var tableClient = cloudClient.CreateCloudTableClient();
-                _table = tableClient.GetTableReference("zones");
-            }
-            else
-            {
-                var cloudClient = CloudStorageAccount.Parse("DefaultEndpointsProtocol=https;AccountName=skynetgdl;AccountKey=KVJGcGdkiUg6rhDyDbvbgb5YfCf3zaQX3z78K5YFrW4zmjaGzAnUlZwCna4k7nhuq9sZU6uqb7dHdi3S5EODvw==;EndpointSuffix=core.windows.net");
-                var tableClient = cloudClient.CreateCloudTableClient();
-                _table = tableClient.GetTableReference("zones");
-            }
+            var cloudClient = CloudStorageAccount.Parse(config.Value.ConnectionString);
+            var tableClient = cloudClient.CreateCloudTableClient();
+            _table = tableClient.GetTableReference("zones");
 
-            var tableTask = _table.CreateIfNotExistsAsync();
-            tableTask.Wait();
+            var task = _table.CreateIfNotExistsAsync();
+            task.Wait();
         }
 
         public async Task<(bool result, Guid id)> CreateZone(Zone zone, Guid userId)

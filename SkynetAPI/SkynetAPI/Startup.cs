@@ -14,6 +14,8 @@ using Microsoft.WindowsAzure.Storage;
 using SkynetAPI.Services;
 using SkynetAPI.Services.Interfaces;
 using SkynetAPI.DBContext;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using SkynetAPI.Configs;
 
 namespace SkynetAPI
 {
@@ -22,15 +24,28 @@ namespace SkynetAPI
         public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
             Configuration = configuration;
-            _env = env;
         }
-
-        private readonly IHostingEnvironment _env;
+        
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                options.Authority = $"https://{Configuration["Auth0:Domain"]}/";
+                options.Audience = Configuration["Auth0:ApiIdentifier"];
+            });
+
+            services.Configure<TableConfig>(config =>
+            {
+                config.ConnectionString = Configuration["StorageAccount"];
+            });
+            
             services.AddTransient<IZonesRepository, ZonesRepository>();
             services.AddTransient<IDevicesRepository, DevicesRepository>();
             services.AddTransient<IClientsRepository, ClientsRepository>();
@@ -46,6 +61,8 @@ namespace SkynetAPI
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseAuthentication();
 
             app.UseMvc(routes =>{
                 routes.MapAreaRoute(

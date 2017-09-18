@@ -2,17 +2,15 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.WindowsAzure.Storage.Table;
 using Microsoft.WindowsAzure.Storage;
+using Microsoft.Extensions.Options;
 
+using SkynetAPI.Models;
+using SkynetAPI.Configs;
+using SkynetAPI.Entities;
 using SkynetAPI.Services.Interfaces;
 using SkynetAPI.Extensions.ClientExtensions;
-using SkynetAPI.Models;
-using SkynetAPI.Models.ConnectedDevices;
-using SkynetAPI.DBContext;
-using SkynetAPI.Entities;
-using Microsoft.AspNetCore.Hosting;
 
 namespace SkynetAPI.Services
 {
@@ -21,24 +19,18 @@ namespace SkynetAPI.Services
         private readonly CloudTable _table;
         private readonly IDevicesRepository _deviceRepository;
 
-        public ClientsRepository(IDevicesRepository devicesRepository, IHostingEnvironment env)
+        public ClientsRepository(
+            IOptions<TableConfig> config,
+            IDevicesRepository devicesRepository)
         {
-            _deviceRepository = devicesRepository;
-            if (env.IsDevelopment())
-            {
-                var account = CloudStorageAccount.DevelopmentStorageAccount;
-                var cloudTableClient = account.CreateCloudTableClient();
-                _table = cloudTableClient.GetTableReference("clients");
-            }
-            else
-            {
-                var account = CloudStorageAccount.Parse("DefaultEndpointsProtocol=https;AccountName=skynetgdl;AccountKey=KVJGcGdkiUg6rhDyDbvbgb5YfCf3zaQX3z78K5YFrW4zmjaGzAnUlZwCna4k7nhuq9sZU6uqb7dHdi3S5EODvw==;EndpointSuffix=core.windows.net");
-                var cloudTableClient = account.CreateCloudTableClient();
-                _table = cloudTableClient.GetTableReference("clients");
-            }
+            var account = CloudStorageAccount.Parse(config.Value.ConnectionString);
+            var cloudTable = account.CreateCloudTableClient();
+            _table = cloudTable.GetTableReference("clients");
 
-            var tableTask = _table.CreateIfNotExistsAsync();
-            tableTask.Wait();
+            var task = _table.CreateIfNotExistsAsync();
+            task.Wait();
+
+            _deviceRepository = devicesRepository;
         }
 
         public async Task<bool> CreateClients(IEnumerable<Client> clients, Guid zoneId)

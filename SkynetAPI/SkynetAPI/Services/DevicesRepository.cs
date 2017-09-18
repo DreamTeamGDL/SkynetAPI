@@ -6,31 +6,28 @@ using System.Reflection;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 using Newtonsoft.Json.Linq;
+using Microsoft.Extensions.Options;
 
 using SkynetAPI.Models;
 using SkynetAPI.Models.ConnectedDevices;
 using SkynetAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Hosting;
+using SkynetAPI.Configs;
 
 namespace SkynetAPI.Services
 {
     public class DevicesRepository : IDevicesRepository
     {
         private readonly CloudTable _table;
-        public DevicesRepository(IHostingEnvironment env)
+
+        public DevicesRepository(IOptions<TableConfig> config)
         {
-            if (env.IsDevelopment())
-            {
-                var account = CloudStorageAccount.DevelopmentStorageAccount;
-                var client = account.CreateCloudTableClient();
-                _table = client.GetTableReference("devices");
-            }
-            else
-            {
-                var account = CloudStorageAccount.Parse("DefaultEndpointsProtocol=https;AccountName=skynetgdl;AccountKey=KVJGcGdkiUg6rhDyDbvbgb5YfCf3zaQX3z78K5YFrW4zmjaGzAnUlZwCna4k7nhuq9sZU6uqb7dHdi3S5EODvw==;EndpointSuffix=core.windows.net");
-                var client = account.CreateCloudTableClient();
-                _table = client.GetTableReference("devices");
-            }
+            var account = CloudStorageAccount.Parse(config.Value.ConnectionString);
+            var client = account.CreateCloudTableClient();
+            _table = client.GetTableReference("devices");
+
+            var task = _table.CreateIfNotExistsAsync();
+            task.Wait();
 
             var tableTask = _table.CreateIfNotExistsAsync();
             tableTask.Wait();
