@@ -11,10 +11,10 @@ namespace SkynetAPI.Entities
     {
         public ZoneEntity() { }
 
-        public ZoneEntity(Guid zoneId, Guid userId)
+        public ZoneEntity(Guid zoneId, string userId)
         {
             this.RowKey = zoneId.ToString();
-            this.PartitionKey = userId.ToString();
+            this.PartitionKey = userId;
         }
 
         public string Name { get; set; }

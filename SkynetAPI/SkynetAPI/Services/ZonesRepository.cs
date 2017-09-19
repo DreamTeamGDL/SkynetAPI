@@ -35,7 +35,7 @@ namespace SkynetAPI.Services
             task.Wait();
         }
 
-        public async Task<(bool result, Guid id)> CreateZone(Zone zone, Guid userId)
+        public async Task<(bool result, Guid id)> CreateZone(Zone zone, string userId)
         {
             var zoneId = Guid.NewGuid();
             var zoneEntity = new ZoneEntity(zoneId, userId)
@@ -49,7 +49,7 @@ namespace SkynetAPI.Services
             return (result.HttpStatusCode == 204, zoneId);
         }
 
-        public async Task<Zone> GetZone(string name, Guid userId)
+        public async Task<Zone> GetZone(string name, string userId)
         {
             var query = new TableQuery<ZoneEntity>()
                 .Where(TableQuery.CombineFilters(
@@ -65,7 +65,7 @@ namespace SkynetAPI.Services
             return zone;
         }
 
-        public async Task<IEnumerable<Zone>> GetZones(Guid userId)
+        public async Task<IEnumerable<Zone>> GetZones(string userId)
         {
             var query = new TableQuery<ZoneEntity>()
                 .Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, userId.ToString()));

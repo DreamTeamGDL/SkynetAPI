@@ -1,15 +1,15 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
+using System.Security.Claims;
 
 using SkynetAPI.Models;
-using SkynetAPI.Models.ConnectedDevices;
-
 using SkynetAPI.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SkynetAPI.Api.Controllers
 {
+    [Authorize]
     [Area("api")]
     [Route("api/[controller]")]
     public class ZonesController : Controller
@@ -28,17 +28,20 @@ namespace SkynetAPI.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get() => Json(await _zonesRepository.GetZones(TEST_GUID));
+        public async Task<IActionResult> Get() 
+            => Json(await _zonesRepository.GetZones(User.FindFirst(ClaimTypes.NameIdentifier).Value));
     
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(string id) => Json(await _zonesRepository.GetZone(id, TEST_GUID));
+        public async Task<IActionResult> Get(string id) 
+            => Json(await _zonesRepository.GetZone(id, User.FindFirst(ClaimTypes.NameIdentifier).Value));
         
         [HttpPost]
         public async Task<IActionResult> Post([FromBody]Zone newZone)
         {
-            if(newZone != null)
+            var id = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            if (newZone != null)
             {
-                var zoneCreated = await _zonesRepository.CreateZone(newZone, TEST_GUID);
+                var zoneCreated = await _zonesRepository.CreateZone(newZone, id);
                 if (zoneCreated.result)
                 {
                     var clientsResult = await _clientsRepository.CreateClients(newZone.Clients, zoneCreated.id);
