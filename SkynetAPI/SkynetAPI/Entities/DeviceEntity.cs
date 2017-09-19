@@ -13,5 +13,7 @@ namespace SkynetAPI.Entities
             this.RowKey = deviceId.ToString();
             this.PartitionKey = clientId.ToString();
         }
+
+        public string Name { get; set; }
     }
 }

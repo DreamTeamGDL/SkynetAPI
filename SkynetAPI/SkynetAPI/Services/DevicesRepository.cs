@@ -41,11 +41,18 @@ namespace SkynetAPI.Services
                 int count = 0;
                 do
                 {
-                    var tempDevices = devices.Skip(count).Take(100).Select(device => new DynamicTableEntity
+                    var tempDevices = devices.Skip(count).Take(100).Select(device => 
                     {
-                        RowKey = Guid.NewGuid().ToString(),
-                        PartitionKey = clientId.ToString(),
-                        Properties = GetProps(device.Data)
+                        var entity = new DynamicTableEntity
+                        {
+                            RowKey = Guid.NewGuid().ToString(),
+                            PartitionKey = clientId.ToString(),
+                            Properties = GetProps(device.Data)
+                        };
+
+                        entity.Properties.Add("name", new EntityProperty(device.Name));
+
+                        return entity;
                     });
 
                     var batchOp = new TableBatchOperation();
@@ -61,11 +68,18 @@ namespace SkynetAPI.Services
             }
             else
             {
-                var entities = devices.Select(device => new DynamicTableEntity
+                var entities = devices.Select(device =>
                 {
-                    RowKey = Guid.NewGuid().ToString(),
-                    PartitionKey = clientId.ToString(),
-                    Properties = GetProps(device.Data)
+                    var entity = new DynamicTableEntity
+                    {
+                        RowKey = Guid.NewGuid().ToString(),
+                        PartitionKey = clientId.ToString(),
+                        Properties = GetProps(device.Data)
+                    };
+
+                    entity.Properties.Add("name", new EntityProperty(device.Name));
+
+                    return entity;
                 });
 
                 var batchOp = new TableBatchOperation();
@@ -98,19 +112,26 @@ namespace SkynetAPI.Services
             var resultDevices = new List<Device>();
             foreach (var device in devices)
             {
-                var resultDevice = new Device()
+                if(device.Properties.TryGetValue("name", out var Name))
                 {
-                    Id = Guid.Parse(device.RowKey)
-                };
+                    var resultDevice = new Device()
+                    {
+                        Id = Guid.Parse(device.RowKey),
+                        Name = Name.StringValue
+                    };
 
-                var dic = new Dictionary<string, object>();
-                foreach (var prop in device.Properties)
-                {
-                    dic.Add(prop.Key, prop.Value.PropertyAsObject);
+                    var dic = new Dictionary<string, object>();
+                    foreach (var prop in device.Properties)
+                    {
+                        if(prop.Key != "name")
+                        {
+                            dic.Add(prop.Key, prop.Value.PropertyAsObject);
+                        }
+                    }
+                    resultDevice.Data = dic;
+
+                    resultDevices.Add(resultDevice);
                 }
-                resultDevice.Data = dic;
-
-                resultDevices.Add(resultDevice);
             }
 
             return resultDevices;
