@@ -64,12 +64,14 @@ namespace SkynetAPI
 
             app.UseAuthentication();
 
-            app.UseMvc(routes =>{
-                routes.MapAreaRoute(
+            app.UseMvc(routes => {
+                routes.MapRoute(
+                    "ADMINRoute",
+                    "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+
+                routes.MapRoute(
                     "APIRoute",
-                    "api",
-                    "{area:exists}/{controller}/{action}/{id?}"
-                );
+                    "{area:exists}/{controller}/{action}/{id?}");
             });
         }
     }

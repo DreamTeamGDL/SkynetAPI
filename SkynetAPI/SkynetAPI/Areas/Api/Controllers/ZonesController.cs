@@ -7,7 +7,7 @@ using SkynetAPI.Models;
 using SkynetAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 
-namespace SkynetAPI.Api.Controllers
+namespace SkynetAPI.Areas.Api.Controllers
 {
     [Authorize]
     [Area("api")]
