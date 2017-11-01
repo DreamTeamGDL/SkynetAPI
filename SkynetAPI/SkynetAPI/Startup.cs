@@ -49,6 +49,7 @@ namespace SkynetAPI
             services.AddTransient<IZonesRepository, ZonesRepository>();
             services.AddTransient<IDevicesRepository, DevicesRepository>();
             services.AddTransient<IClientsRepository, ClientsRepository>();
+            services.AddTransient<IConfigurationRepository, ConfigurationRepository>();
             services.AddTransient<IUserMapper, UserMapper>();
 
             services.AddMvc();
