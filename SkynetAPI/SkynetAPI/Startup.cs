@@ -50,6 +50,7 @@ namespace SkynetAPI
             services.AddTransient<IDevicesRepository, DevicesRepository>();
             services.AddTransient<IClientsRepository, ClientsRepository>();
             services.AddTransient<IConfigurationRepository, ConfigurationRepository>();
+            services.AddTransient<IUserRepository, UsersRepository>();
             services.AddTransient<IUserMapper, UserMapper>();
 
             services.AddMvc();
@@ -63,12 +64,14 @@ namespace SkynetAPI
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseStaticFiles();
+
             app.UseAuthentication();
 
             app.UseMvc(routes => {
                 routes.MapRoute(
                     "ADMINRoute",
-                    "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+                    "{area:exists}/{controller=Users}/{action=Index}/{id?}");
 
                 routes.MapRoute(
                     "APIRoute",

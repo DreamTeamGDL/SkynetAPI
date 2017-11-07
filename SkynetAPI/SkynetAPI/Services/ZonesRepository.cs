@@ -40,7 +40,8 @@ namespace SkynetAPI.Services
             var zoneId = Guid.NewGuid();
             var zoneEntity = new ZoneEntity(zoneId, userId)
             {
-                Name = zone.Name
+                Name = zone.Name,
+                ImageIndex = zone.ImageIndex
             };
 
             var operation = TableOperation.Insert(zoneEntity);
@@ -65,10 +66,21 @@ namespace SkynetAPI.Services
             return zone;
         }
 
+        public async Task<ZoneEntity> GetZone(string zoneId)
+        {
+            var query = new TableQuery<ZoneEntity>()
+                .Where(TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, zoneId));
+
+            var queryResult = await _table.ExecuteQuerySegmentedAsync(query, null);
+            var zone = queryResult.Results.First();
+
+            return zone;
+        }
+
         public async Task<IEnumerable<Zone>> GetZones(string userId)
         {
             var query = new TableQuery<ZoneEntity>()
-                .Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, userId.ToString()));
+                .Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, userId));
 
             var results = new List<ZoneEntity>();
 
@@ -89,7 +101,7 @@ namespace SkynetAPI.Services
                 zones.Add(zone);
             }
 
-            return zones;
+            return results.Select(zone => zone.ToZone());
         }
     }
 }

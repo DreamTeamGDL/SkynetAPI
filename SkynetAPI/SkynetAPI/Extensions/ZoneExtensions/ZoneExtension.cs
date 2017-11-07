@@ -15,7 +15,8 @@ namespace SkynetAPI.Extensions.ZoneExtensions
             return new Zone
             {
                 Name = entity.Name,
-                Id = Guid.Parse(entity.RowKey)
+                Id = Guid.Parse(entity.RowKey),
+                ImageIndex = entity.ImageIndex
             };
         }
     }

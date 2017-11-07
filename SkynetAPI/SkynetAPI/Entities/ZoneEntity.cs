@@ -18,5 +18,6 @@ namespace SkynetAPI.Entities
         }
 
         public string Name { get; set; }
+        public int ImageIndex { get; set; }
     }
 }

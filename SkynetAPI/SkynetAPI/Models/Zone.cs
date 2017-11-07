@@ -8,6 +8,7 @@ namespace SkynetAPI.Models
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public List<Client> Clients { get; set; } 
+        public List<Client> Clients { get; set; }
+        public int ImageIndex { get; set; }
     }
 }

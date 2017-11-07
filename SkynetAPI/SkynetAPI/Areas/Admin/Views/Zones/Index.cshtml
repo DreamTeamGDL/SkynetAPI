@@ -1,0 +1,30 @@
+﻿@using SkynetAPI.Models
+@model IEnumerable<Zone>;
+
+<div class="wrapper-header col-md-12">
+    <div class="col-md-12">
+        <h1>
+            <strong>Cesar Espinosa's</strong> House
+        </h1>
+        <h4>Select a zone</h4>
+        <a class="btn btn-default" asp-area="admin" asp-controller="zones" asp-action="create" asp-route-id="@ViewData["USER_ID"]">+ ZONE</a>
+        <br>
+        <br>
+    </div>
+</div>
+<div class="wrapper-header-content col-md-12">
+    <div class="col-md-4">
+        <h1>Zones</h1>
+    </div>
+</div>
+<div class="wrapper-content col-md-12">
+    @foreach (var zone in Model)
+    {
+        <div class="col-md-3">
+            <a asp-area="admin" asp-controller="clients" asp-route-id="@zone.Id">
+                <img src="@String.Format("/img/zones/zone_0{0}.jpg", zone.ImageIndex)" />
+            </a>
+            <h3>@zone.Name</h3>
+        </div>
+    }
+</div>
