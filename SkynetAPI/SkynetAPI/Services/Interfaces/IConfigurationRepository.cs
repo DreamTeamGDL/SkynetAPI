@@ -10,6 +10,8 @@ namespace SkynetAPI.Services.Interfaces
 {
     public interface IConfigurationRepository
     {
+        Task<MainConfiguration> Get(string macAddress);
+
         Task<ClientConfiguration> Get(Guid zoneId, string macAddress);
 
         Task<ClientConfigurationVM> Update(ClientConfigurationVM config);

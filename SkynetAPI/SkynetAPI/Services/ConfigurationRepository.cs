@@ -36,6 +36,41 @@ namespace SkynetAPI.Services
             return result.HttpStatusCode == 204 ? config : null;
         }
 
+        public async Task<MainConfiguration> Create(MainConfiguration configuration, string userID)
+        {
+            var entity = new DynamicTableEntity(userID, configuration.MacAddress)
+            {
+                Properties = new Dictionary<string, EntityProperty>
+                {
+                    {"ZoneID", new EntityProperty(configuration.ZoneID) }
+                }
+            };
+
+            var op = TableOperation.Insert(entity);
+            var result = await _configTable.ExecuteAsync(op);
+
+            return result.HttpStatusCode == 204 ? configuration : null;
+        }
+
+        public async Task<MainConfiguration> Get(string macAddress)
+        {
+            var query = new TableQuery<DynamicTableEntity>()
+                .Where(TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, macAddress));
+
+            var results = await _configTable.ExecuteQuerySegmentedAsync(query, null);
+            var gotFirst = results?.Results?.First();
+
+            if(gotFirst != null)
+                if(gotFirst.Properties.TryGetValue("ZoneID", out var prop))
+                    if (prop.GuidValue.HasValue)
+                        return new MainConfiguration
+                        {
+                            ZoneID = prop.GuidValue.Value
+                        };
+
+            return null;
+        }
+
         public async Task<ClientConfiguration> Get(Guid zoneId, string macAddress)
         {
             var op = TableOperation.Retrieve<DynamicTableEntity>(zoneId.ToString(), macAddress);
