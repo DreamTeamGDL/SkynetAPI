@@ -10,5 +10,6 @@ namespace SkynetAPI.Services.Interfaces
     {
         Task<IEnumerable<Client>> GetClients(Guid zoneId);
         Task<bool> CreateClients(IEnumerable<Client> clients, Guid zoneId);
+        Task<bool> CreateClient(Client client, Guid zoneId);
     }
 }

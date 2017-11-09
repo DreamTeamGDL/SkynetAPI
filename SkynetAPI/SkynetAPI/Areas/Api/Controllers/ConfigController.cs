@@ -20,6 +20,10 @@ namespace SkynetAPI.Areas.Api.Controllers
             _configurationRepository = configurationRepository;
         }
 
+        [HttpGet("{macAddress}")]
+        public async Task<IActionResult> Get(string macAddress)
+            => Json(await _configurationRepository.Get(macAddress));
+
         [HttpGet("{id}/{macAddress}")]
         public async Task<IActionResult> Get(string id, string macAddress)
         {

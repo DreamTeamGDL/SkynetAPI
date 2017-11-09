@@ -37,8 +37,7 @@ namespace SkynetAPI.Services
 
         public async Task<(bool result, Guid id)> CreateZone(Zone zone, string userId)
         {
-            var zoneId = Guid.NewGuid();
-            var zoneEntity = new ZoneEntity(zoneId, userId)
+            var zoneEntity = new ZoneEntity(zone.Id, userId)
             {
                 Name = zone.Name,
                 ImageIndex = zone.ImageIndex
@@ -47,7 +46,7 @@ namespace SkynetAPI.Services
             var operation = TableOperation.Insert(zoneEntity);
             var result = await _table.ExecuteAsync(operation);
 
-            return (result.HttpStatusCode == 204, zoneId);
+            return (result.HttpStatusCode == 204, zone.Id);
         }
 
         public async Task<Zone> GetZone(string name, string userId)

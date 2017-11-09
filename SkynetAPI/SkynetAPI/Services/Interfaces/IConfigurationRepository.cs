@@ -19,5 +19,7 @@ namespace SkynetAPI.Services.Interfaces
         Task<ClientConfigurationVM> Delete(ClientConfigurationVM config);
 
         Task<ClientConfigurationVM> Create(ClientConfigurationVM config);
+
+        Task<MainConfiguration> Create(MainConfiguration configuration, string userID);
     }
 }

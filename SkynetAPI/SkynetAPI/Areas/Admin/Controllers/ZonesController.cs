@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 
 using SkynetAPI.Services.Interfaces;
 using SkynetAPI.Models;
+using SkynetAPI.ViewModels;
+using SkynetAPI.Models.Config;
 
 namespace SkynetAPI.Areas.Admin.Controllers
 {
@@ -13,9 +15,13 @@ namespace SkynetAPI.Areas.Admin.Controllers
     public class ZonesController : Controller
     {
         private IZonesRepository _zonesRepository;
-        public ZonesController(IZonesRepository zonesRepository)
+        private IConfigurationRepository _configurationRepository;
+        public ZonesController(
+            IZonesRepository zonesRepository,
+            IConfigurationRepository configurationRepository)
         {
             _zonesRepository = zonesRepository;
+            _configurationRepository = configurationRepository;
         }
 
         public async Task<IActionResult> Index(string id)
@@ -32,9 +38,22 @@ namespace SkynetAPI.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(string id, Zone zone)
+        public async Task<IActionResult> Create(string id, ZoneVM zone)
         {
-            var result = await _zonesRepository.CreateZone(zone, $"auth0|{id}");
+            var zoneID = Guid.NewGuid();
+            var result = await _zonesRepository.CreateZone(new Zone
+            {
+                Name = zone.Name,
+                Id = zoneID,
+                ImageIndex = zone.ImageIndex
+            }, $"auth0|{id}");
+
+            var config = await _configurationRepository.Create(new MainConfiguration
+            {
+                ZoneID = zoneID,
+                MacAddress = zone.MacAddress
+            }, id);
+
             if (result.result)
             {
                 return RedirectToAction("index", "clients", new { Id = result.id });

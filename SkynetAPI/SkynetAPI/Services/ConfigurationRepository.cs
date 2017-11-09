@@ -65,7 +65,8 @@ namespace SkynetAPI.Services
                     if (prop.GuidValue.HasValue)
                         return new MainConfiguration
                         {
-                            ZoneID = prop.GuidValue.Value
+                            ZoneID = prop.GuidValue.Value,
+                            MacAddress = gotFirst.RowKey
                         };
 
             return null;

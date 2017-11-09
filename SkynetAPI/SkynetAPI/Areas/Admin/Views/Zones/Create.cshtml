@@ -1,4 +1,5 @@
-﻿@model Zone
+﻿@using SkynetAPI.ViewModels;
+@model ZoneVM
 
 <div class="wrapper-header col-md-12">
     <div class="col-md-12">
@@ -28,13 +29,18 @@
                 <div class="form-group">
                     <div class="input-group">
                         <h5>Name: </h5>
-                        <input asp-for="Name" type="text" class="form-control" placeholder="kitchen" aria-describedby="basic-addon1" required>
+                        <input asp-for="Name" type="text" class="form-control" placeholder="kitchen" aria-describedby="basic-addon1" required />
                         <br>
                     </div>
                     <div class="input-group">
                         <h5>Image index: </h5>
-                        <input asp-for="ImageIndex" type="number" class="form-control" placeholder="Entrance fan" aria-describedby="basic-addon1" required>
+                        <input asp-for="ImageIndex" type="number" class="form-control" placeholder="Entrance fan" aria-describedby="basic-addon1" required />
                         <br>
+                    </div>
+                    <div class="input-group">
+                        <h5>MAC Address: </h5>
+                        <input asp-for="MacAddress" type="text" class="form-control" placeholder="Enter MAC Address" aria-describedby="basic-addon1" required />
+                        <br />
                     </div>
                 </div>
                 <button type="submit" class="btn btn-default">Save</button>

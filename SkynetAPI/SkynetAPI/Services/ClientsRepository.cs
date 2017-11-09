@@ -33,6 +33,20 @@ namespace SkynetAPI.Services
             _deviceRepository = devicesRepository;
         }
 
+        public async Task<bool> CreateClient(Client client, Guid zoneId)
+        {
+            var clientEntity = new ClientEntity(client.Id, zoneId)
+            {
+                Name = client.Name,
+                Alias = client.Alias
+            };
+
+            var insertOP = TableOperation.Insert(clientEntity);
+            var result = await _table.ExecuteAsync(insertOP);
+
+            return result.HttpStatusCode == 200;
+        }
+
         public async Task<bool> CreateClients(IEnumerable<Client> clients, Guid zoneId)
         {
             var results = new List<IList<TableResult>>();
