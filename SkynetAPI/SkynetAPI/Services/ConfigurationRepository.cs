@@ -81,6 +81,22 @@ namespace SkynetAPI.Services
         }
 
         public Task<ClientConfigurationVM> Delete(ClientConfigurationVM config) => throw new NotImplementedException();
-        public Task<ClientConfigurationVM> Update(ClientConfigurationVM config) => throw new NotImplementedException();
+        
+        public async Task<bool> Update(Guid id, string deviceName, int pinNumber)
+        {
+            var query = new TableQuery()
+                .Where(TableQuery.GenerateFilterConditionForGuid("ClientId", QueryComparisons.Equal, id));
+
+            var results = await _configTable.ExecuteQuerySegmentedAsync(query, null);
+            var entity = results?.Results?.First();
+
+            entity.Properties.Add(deviceName, new EntityProperty(pinNumber));
+            entity.ETag = "*";
+
+            var updateOp = TableOperation.InsertOrReplace(entity);
+            var opResult = await _configTable.ExecuteAsync(updateOp);
+
+            return opResult.HttpStatusCode == 204;
+        }
     }
 }

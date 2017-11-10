@@ -33,6 +33,15 @@ namespace SkynetAPI.Services
             tableTask.Wait();
         }
 
+        public async Task<bool> Create(Device device, Guid clienId)
+        {
+            var entity = device.ToEntity(clienId);
+            var op = TableOperation.Insert(entity);
+
+            var result = await _table.ExecuteAsync(op);
+            return result.HttpStatusCode == 204;
+        }
+
         public async Task<bool> CreateDevices(List<Device> devices, Guid clientId)
         {
             var results = new List<IList<TableResult>>();

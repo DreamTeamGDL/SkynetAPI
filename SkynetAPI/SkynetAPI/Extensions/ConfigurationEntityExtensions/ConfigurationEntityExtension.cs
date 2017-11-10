@@ -15,12 +15,13 @@ namespace SkynetAPI.Extensions.ConfigurationEntityExtensions
         {
             var config = new ClientConfiguration
             {
-                ClientName = entity.Properties["ClientName"].StringValue
+                ClientName = entity.Properties["ClientName"].StringValue,
+                ClientId = entity.Properties["ClientId"].GuidValue.Value
             };
 
             foreach (var prop in entity.Properties)
             {
-                if(prop.Key != "ClientName")
+                if(prop.Key != "ClientName" || prop.Key != "ClientId")
                 {
                     var newKey = prop.Key.Replace("_", " ");
                     config.PinMap.Add(newKey, prop.Value.Int32Value ?? 0);
@@ -46,7 +47,8 @@ namespace SkynetAPI.Extensions.ConfigurationEntityExtensions
         {
             var newProps = new Dictionary<string, EntityProperty>
             {
-                { nameof(configuration.ClientName), new EntityProperty(configuration.ClientName) }
+                { nameof(configuration.ClientName), new EntityProperty(configuration.ClientName) },
+                { nameof(configuration.ClientId), new EntityProperty(configuration.ClientId) }
             };
 
             foreach (var pin in configuration.PinMap)

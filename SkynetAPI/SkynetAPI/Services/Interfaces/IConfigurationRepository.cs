@@ -14,7 +14,7 @@ namespace SkynetAPI.Services.Interfaces
 
         Task<ClientConfiguration> Get(Guid zoneId, string macAddress);
 
-        Task<ClientConfigurationVM> Update(ClientConfigurationVM config);
+        Task<bool> Update(Guid id, string deviceName, int pinNumber);
 
         Task<ClientConfigurationVM> Delete(ClientConfigurationVM config);
 

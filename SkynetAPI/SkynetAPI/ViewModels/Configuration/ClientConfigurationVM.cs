@@ -12,6 +12,6 @@ namespace SkynetAPI.ViewModels.Configuration
     {
         public string MacAddress { get; set; }
         public Guid ZoneId { get; set; }
-        public ClientConfiguration Configuration { get; set; }
+        public ClientConfiguration Configuration { get; set; } = new ClientConfiguration();
     }
 }

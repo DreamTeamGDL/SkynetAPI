@@ -15,7 +15,7 @@ namespace SkynetAPI.Extensions.DeviceEntityExtensions
         {
             var entity = new DynamicTableEntity
             {
-                RowKey = Guid.NewGuid().ToString(),
+                RowKey = device.Id.ToString(),
                 PartitionKey = clientId.ToString(),
                 Properties = GetProps(device.Data)
             };
@@ -27,28 +27,33 @@ namespace SkynetAPI.Extensions.DeviceEntityExtensions
 
         private static Dictionary<string, EntityProperty> GetProps(JObject data)
         {
-            var dic = new Dictionary<string, EntityProperty>();
-            foreach (var token in data)
+            if(data != null)
             {
-                switch (token.Value.Type)
+                var dic = new Dictionary<string, EntityProperty>();
+                foreach (var token in data)
                 {
-                    case JTokenType.Integer:
-                        dic.Add(token.Key, new EntityProperty(token.Value.Value<int>()));
-                        break;
-                    case JTokenType.Float:
-                        dic.Add(token.Key, new EntityProperty(token.Value.Value<float>()));
-                        break;
-                    case JTokenType.String:
-                        dic.Add(token.Key, new EntityProperty(token.Value.Value<string>()));
-                        break;
-                    case JTokenType.Boolean:
-                        dic.Add(token.Key, new EntityProperty(token.Value.Value<bool>()));
-                        break;
-                    default:
-                        break;
+                    switch (token.Value.Type)
+                    {
+                        case JTokenType.Integer:
+                            dic.Add(token.Key, new EntityProperty(token.Value.Value<int>()));
+                            break;
+                        case JTokenType.Float:
+                            dic.Add(token.Key, new EntityProperty(token.Value.Value<float>()));
+                            break;
+                        case JTokenType.String:
+                            dic.Add(token.Key, new EntityProperty(token.Value.Value<string>()));
+                            break;
+                        case JTokenType.Boolean:
+                            dic.Add(token.Key, new EntityProperty(token.Value.Value<bool>()));
+                            break;
+                        default:
+                            break;
+                    }
                 }
+                return dic;
             }
-            return dic;
+
+            return new Dictionary<string, EntityProperty>();
         }
     }
 }

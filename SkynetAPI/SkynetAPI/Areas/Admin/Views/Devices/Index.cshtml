@@ -7,7 +7,7 @@
             <strong>Cesar Espinosa's</strong> Living Room (Raspberry Pi)
         </h1>
         <h4>Edit or select a device</h4>
-        <a class="btn btn-default" asp-area="admin" asp-controller="devices" asp-action="create" asp-route-id="@ViewData["USER_ID"]">+ DEVICE</a>
+        <a class="btn btn-default" asp-area="admin" asp-controller="devices" asp-action="create" asp-route-id="@ViewData["CLIENT_ID"]">+ DEVICE</a>
         <br>
         <br>
     </div>
@@ -34,7 +34,7 @@
                 {
                     <tr>
                         <td>
-                            <a asp-area="admin" asp-controller="devices" asp-action="edit" asp-route-id="@ViewData["USER_ID"]">
+                            <a asp-area="admin" asp-controller="devices" asp-action="edit" asp-route-id="@device.Id">
                                 <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
                             </a>
                         </td>
@@ -42,15 +42,17 @@
                         <td>
                             <img src="~/img/icons/icon_01.png" />
                         </td>
-                        @{ 
-                            var value = device.Data["status"].ToObject<bool>();
-                            if (value)
+                        @{
+                            if (device.Data.TryGetValue("status", StringComparison.Ordinal, out var value))
                             {
-                                <td>ON</td>
-                            }
-                            else
-                            {
-                                <td> OFF </td>
+                                if (value.Value<bool>("status"))
+                                {
+                                    <td>ON</td>
+                                }
+                                else
+                                {
+                                    <td> OFF </td>
+                                }
                             }
                         }
                         <!--FALTA AGREGAR PIN-->

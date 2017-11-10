@@ -7,6 +7,7 @@ namespace SkynetAPI.Models.Config
 {
     public class ClientConfiguration
     {
+        public Guid ClientId { get; set; }
         public string ClientName { get; set; }
         public Dictionary<string, int> PinMap { get; set; } = new Dictionary<string, int>();
     }

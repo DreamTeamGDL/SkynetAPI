@@ -9,6 +9,7 @@ namespace SkynetAPI.Services.Interfaces
     public interface IDevicesRepository
     {
         Task<bool> CreateDevices(List<Device> devices, Guid clientId);
+        Task<bool> Create(Device device, Guid clienId);
         Task<IEnumerable<Device>> GetDevices(Guid clientId);
     }
 }
