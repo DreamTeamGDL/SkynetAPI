@@ -24,6 +24,7 @@ namespace SkynetAPI.Areas.Admin.Controllers
             _configurationRepository = configurationRepository;
         }
 
+        [HttpGet]
         public async Task<IActionResult> Index(string id)
         {
             ViewData["USER_ID"] = id;

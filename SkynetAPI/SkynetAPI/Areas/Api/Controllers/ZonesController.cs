@@ -6,12 +6,13 @@ using System.Security.Claims;
 using SkynetAPI.Models;
 using SkynetAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using SkynetAPI.ViewModels;
 
 namespace SkynetAPI.Areas.Api.Controllers
 {
-    [Authorize]
     [Area("api")]
     [Route("api/[controller]")]
+    [Authorize]
     public class ZonesController : Controller
     {
         private readonly Guid TEST_GUID;
@@ -54,6 +55,17 @@ namespace SkynetAPI.Areas.Api.Controllers
                 }
 
                 return BadRequest(ModelState);
+            }
+
+            return BadRequest();
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> Put([FromBody] ZoneUpdate update)
+        {
+            if(await _zonesRepository.UpdateName(update.ZoneID, update.NewName))
+            {
+                return Ok();
             }
 
             return BadRequest();

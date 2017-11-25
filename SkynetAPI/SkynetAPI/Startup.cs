@@ -37,8 +37,8 @@ namespace SkynetAPI
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(options =>
             {
-                options.Authority = $"https://{Configuration["Auth0:Domain"]}/";
-                options.Audience = Configuration["Auth0:ApiIdentifier"];
+                options.Authority = $"{Configuration["Auth0:Domain"]}";
+                options.Audience = Configuration["Auth0:Audience"];
             });
 
             services.Configure<TableConfig>(config =>
@@ -52,6 +52,7 @@ namespace SkynetAPI
             services.AddTransient<IConfigurationRepository, ConfigurationRepository>();
             services.AddTransient<IUserRepository, UsersRepository>();
             services.AddTransient<IUserMapper, UserMapper>();
+            services.AddTransient<IQueueService, QueueService>();
 
             services.AddMvc();
         }

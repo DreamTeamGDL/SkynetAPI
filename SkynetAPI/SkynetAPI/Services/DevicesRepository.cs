@@ -25,21 +25,43 @@ namespace SkynetAPI.Services
             var account = CloudStorageAccount.Parse(config.Value.ConnectionString);
             var client = account.CreateCloudTableClient();
             _table = client.GetTableReference("devices");
-
-            var task = _table.CreateIfNotExistsAsync();
-            task.Wait();
-
-            var tableTask = _table.CreateIfNotExistsAsync();
-            tableTask.Wait();
         }
 
-        public async Task<bool> Create(Device device, Guid clienId)
+        public async Task<bool> Create(Device device, Guid clienId, DEVICE_TYPE type)
         {
+            device.Data = CreateData(type);
             var entity = device.ToEntity(clienId);
             var op = TableOperation.Insert(entity);
 
             var result = await _table.ExecuteAsync(op);
             return result.HttpStatusCode == 204;
+        }
+
+        private JObject CreateData(DEVICE_TYPE type)
+        {
+            var data = new JObject
+            {
+                { "status", JToken.FromObject(false) }
+            };
+
+            switch (type)
+            {
+                case DEVICE_TYPE.Fan:
+                    data.Add("temperature", JToken.FromObject(0.0));
+                    data.Add("humidity", JToken.FromObject(0.0));
+                    data.Add("speed", JToken.FromObject(0));
+                    break;
+                case DEVICE_TYPE.Light:
+                    data.Add("voltage", 0);
+                    data.Add("timeon", 0.0);
+                    break;
+                case DEVICE_TYPE.Camera:
+                    break;
+                default:
+                    break;
+            }
+
+            return data;
         }
 
         public async Task<bool> CreateDevices(List<Device> devices, Guid clientId)
@@ -128,6 +150,40 @@ namespace SkynetAPI.Services
             }
 
             return resultDevices;
+        }
+
+        public async Task<bool> Update(string clientID, string update)
+        {
+            var splittedAction = update.Split(";");
+            var query = new TableQuery<DynamicTableEntity>()
+                .Where(
+                TableQuery.CombineFilters(
+                    TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, clientID),
+                    TableOperators.And,
+                    TableQuery.GenerateFilterCondition("name", QueryComparisons.Equal, splittedAction[0])));
+
+            var result = await _table.ExecuteQuerySegmentedAsync(query, null);
+            var device = result?.Results?.First() ?? null;
+
+            if(device != null)
+            {
+                if(bool.TryParse(splittedAction[1], out var newStatus))
+                {
+                    device.Properties["status"] = new EntityProperty(newStatus);
+
+                    return await UpdateEntity(device);
+                }
+            }
+
+            return false;
+        }
+
+        private async Task<bool> UpdateEntity(DynamicTableEntity entity)
+        {
+            entity.ETag = "*";
+            var operation = TableOperation.Replace(entity);
+
+            return (await _table.ExecuteAsync(operation)).HttpStatusCode == 204;
         }
     }
 }

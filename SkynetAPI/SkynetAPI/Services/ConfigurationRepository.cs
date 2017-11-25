@@ -16,16 +16,18 @@ namespace SkynetAPI.Services
 {
     public class ConfigurationRepository : IConfigurationRepository
     {
+        private IQueueService _queueService;
         private CloudTable _configTable;
-        public ConfigurationRepository(IOptions<TableConfig> options)
+        public ConfigurationRepository(
+            IOptions<TableConfig> options,
+            IQueueService queueService)
         {
             var account = CloudStorageAccount.Parse(options.Value.ConnectionString);
             var tableClient = account.CreateCloudTableClient();
 
             _configTable = tableClient.GetTableReference("Configurations");
-            var tableTask = _configTable.CreateIfNotExistsAsync();
-            tableTask.Wait();
 
+            _queueService = queueService;
         }
 
         public async Task<ClientConfigurationVM> Create(ClientConfigurationVM config)
@@ -93,8 +95,12 @@ namespace SkynetAPI.Services
             entity.Properties.Add(deviceName, new EntityProperty(pinNumber));
             entity.ETag = "*";
 
+            var enqueue = _queueService.Enqueue(entity.ToVM());
+
             var updateOp = TableOperation.InsertOrReplace(entity);
             var opResult = await _configTable.ExecuteAsync(updateOp);
+
+            await enqueue;
 
             return opResult.HttpStatusCode == 204;
         }

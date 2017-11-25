@@ -21,6 +21,7 @@ namespace SkynetAPI.Extensions.DeviceEntityExtensions
             };
 
             entity.Properties.Add("name", new EntityProperty(device.Name));
+            entity.Properties.Add("type", new EntityProperty(device.Type));
 
             return entity;
         }

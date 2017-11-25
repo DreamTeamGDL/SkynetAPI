@@ -13,5 +13,6 @@ namespace SkynetAPI.Services.Interfaces
         Task<Zone> GetZone(string name, string userId);
         Task<IEnumerable<Zone>> GetZones(string userId);
         Task<(bool result, Guid id)> CreateZone(Zone zone, string userId);
+        Task<bool> UpdateName(string zoneID, string newName);
     }
 }

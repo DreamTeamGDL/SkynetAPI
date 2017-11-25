@@ -17,7 +17,7 @@ namespace SkynetAPI.Services
                 {
                     Name = "Miguel Pérez García",
                     Username = "Miker1423",
-                    Id = "59bf3bb07c2eab787c16b3c6"
+                    Id = "59bf3bdf8bd5a32e1089672d"
                 },
                 new User
                 {
@@ -29,7 +29,7 @@ namespace SkynetAPI.Services
                 {
                     Name = "Chris Marquez",
                     Username = "El christoforo",
-                    Id = "59bf3bdf8bd5a32e1089672d"
+                    Id = "59bf3bb07c2eab787c16b3c6"
                 }
             });
     }

@@ -30,9 +30,6 @@ namespace SkynetAPI.Services
             var cloudClient = CloudStorageAccount.Parse(config.Value.ConnectionString);
             var tableClient = cloudClient.CreateCloudTableClient();
             _table = tableClient.GetTableReference("zones");
-
-            var task = _table.CreateIfNotExistsAsync();
-            task.Wait();
         }
 
         public async Task<(bool result, Guid id)> CreateZone(Zone zone, string userId)
@@ -101,6 +98,32 @@ namespace SkynetAPI.Services
             }
 
             return results.Select(zone => zone.ToZone());
+        }
+
+        public async Task<bool> UpdateName(string zoneID, string newName)
+        {
+            var query = new TableQuery<ZoneEntity>()
+                .Where(TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, zoneID));
+
+            var results = await _table.ExecuteQuerySegmentedAsync(query, null);
+            var zone = results?.Results?.First() ?? null;
+
+            if(zone != null)
+            {
+                zone.Name = newName;
+                zone.ETag = "*";
+
+                return await UpdateZone(zone);
+            }
+
+            return false;
+        }
+
+        private async Task<bool> UpdateZone(ZoneEntity entity)
+        {
+            var operation = TableOperation.InsertOrMerge(entity);
+            var result = await _table.ExecuteAsync(operation);
+            return result.HttpStatusCode == 204;
         }
     }
 }

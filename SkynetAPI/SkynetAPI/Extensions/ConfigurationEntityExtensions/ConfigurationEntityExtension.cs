@@ -21,9 +21,9 @@ namespace SkynetAPI.Extensions.ConfigurationEntityExtensions
 
             foreach (var prop in entity.Properties)
             {
-                if(prop.Key != "ClientName" || prop.Key != "ClientId")
+                if(prop.Key != "ClientName" && prop.Key != "ClientId")
                 {
-                    var newKey = prop.Key.Replace("_", " ");
+                    var newKey = prop.Key.Replace("_", " ").Substring(1);
                     config.PinMap.Add(newKey, prop.Value.Int32Value ?? 0);
                 }
             }

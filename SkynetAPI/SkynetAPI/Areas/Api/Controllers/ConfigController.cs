@@ -7,11 +7,13 @@ using Microsoft.AspNetCore.Mvc;
 using SkynetAPI.Models.Config;
 using SkynetAPI.Services.Interfaces;
 using SkynetAPI.ViewModels.Configuration;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SkynetAPI.Areas.Api.Controllers
 {
     [Area("api")]
     [Route("api/[controller]")]
+    [Authorize]
     public class ConfigController : Controller
     {
         private IConfigurationRepository _configurationRepository;

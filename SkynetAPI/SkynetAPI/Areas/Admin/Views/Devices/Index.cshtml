@@ -45,7 +45,7 @@
                         @{
                             if (device.Data.TryGetValue("status", StringComparison.Ordinal, out var value))
                             {
-                                if (value.Value<bool>("status"))
+                                if (value.ToObject<bool>())
                                 {
                                     <td>ON</td>
                                 }

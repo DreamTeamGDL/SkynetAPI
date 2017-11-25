@@ -27,9 +27,6 @@ namespace SkynetAPI.Services
             var cloudTable = account.CreateCloudTableClient();
             _table = cloudTable.GetTableReference("clients");
 
-            var task = _table.CreateIfNotExistsAsync();
-            task.Wait();
-
             _deviceRepository = devicesRepository;
         }
 
@@ -112,6 +109,17 @@ namespace SkynetAPI.Services
             return results.Select(result => result.Where(result2 => result2.HttpStatusCode != 204)).Count() != 0;
         }
 
+        public async Task<bool> UpdateDevice(string name, string action)
+        {
+            var query = new TableQuery<ClientEntity>()
+                .Where(TableQuery.GenerateFilterCondition("Name", QueryComparisons.Equal, name));
+
+            var results = await _table.ExecuteQuerySegmentedAsync(query, null);
+            var clientID = results?.Results?.First()?.RowKey ?? null;
+
+            return await _deviceRepository.Update(clientID, action);
+        }
+
         public async Task<IEnumerable<Client>> GetClients(Guid zoneId)
         {
             var query = new TableQuery<ClientEntity>()
@@ -131,7 +139,8 @@ namespace SkynetAPI.Services
             for (int i = 0; i < clients.Count; i++)
             {
                 var client = clients[i].ToClient();
-                client.Devices = (await _deviceRepository.GetDevices(Guid.Parse(clients[i].RowKey))).ToList();
+
+                client.Devices = (await _deviceRepository.GetDevices(client.Id)).ToList();
 
                 finalResults.Add(client);
             }

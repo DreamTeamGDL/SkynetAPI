@@ -38,7 +38,7 @@ namespace SkynetAPI.Areas.Admin.Controllers
         public IActionResult Create(string id)
         {
             ViewData["CLIENT_ID"] = id;
-            return View();
+            return View(new DeviceVM());
         }
 
         [HttpPost]
@@ -47,7 +47,7 @@ namespace SkynetAPI.Areas.Admin.Controllers
             if (Guid.TryParse(id, out var ID))
             {
                 var deviceId = Guid.NewGuid();
-                var normalizedName = deviceId.ToString().Replace("-", "_").Insert(0, "A");
+                var normalizedName = deviceVM.DeviceName.Replace(" ", "_").Insert(0, "A");
 
                 var changedConfig = await _configurationRepository.Update(ID, normalizedName, deviceVM.PinNumber);
                 if (changedConfig)
@@ -55,8 +55,9 @@ namespace SkynetAPI.Areas.Admin.Controllers
                     var result = await _devicesRepository.Create(new Models.Device
                     {
                         Name = deviceVM.DeviceName,
-                        Id = deviceId
-                    }, ID);
+                        Id = deviceId,
+                        Type = deviceVM.Type.ToString()
+                    }, ID, deviceVM.Type);
 
                     return RedirectToAction("Index", new { Id = id });
                 }
