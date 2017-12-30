@@ -13,7 +13,6 @@ namespace SkynetAPI.Areas.Api.Controllers
 {
     [Area("api")]
     [Route("api/[controller]")]
-    [Authorize]
     public class ClientsController : Controller
     {
         private IClientsRepository _clientsRepository;

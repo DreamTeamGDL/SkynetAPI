@@ -12,7 +12,6 @@ namespace SkynetAPI.Areas.Api.Controllers
 {
     [Area("api")]
     [Route("api/[controller]")]
-    [Authorize]
     public class ZonesController : Controller
     {
         private readonly Guid TEST_GUID;
